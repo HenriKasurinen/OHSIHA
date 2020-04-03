@@ -6,7 +6,7 @@
 {% endfor %}
 </ul>
 
-<a href="{% url 'ohsiha_app:detail' question.next_question %}">Vote again?</a>
+<a href="{% url 'ohsiha_app:detail' question.next_question %}">Next question</a>
 
 {% if user.is_authenticated %}
   Hi {{ user.username }}!

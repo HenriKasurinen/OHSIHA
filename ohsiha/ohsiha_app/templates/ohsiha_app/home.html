@@ -6,9 +6,14 @@
 {% block content %}
 {% if user.is_authenticated %}
   Hi {{ user.username }}!
-  <h2>VISIT TAMPERE-SETTIÄ</h2>
-  <p> <strong>Kontenttia interwebista </strong> </p>
-  <html>{{ contentti }}</html>
+  <h2>KORONATILASTOJA</h2>
+  <p> <strong>Jokaisen valmentajan on hyvä tietää onko turvallista treenata. 
+    Tarkista tilanne kuvaajasta! </strong> </p>
+  <p>Varmennetut tapaukset: <strong>{{ confirmed }}</strong></p>
+  <p>Parantuneet potilaat: <strong>{{ recovered }}</strong></p>
+
+  <p><strong>Päivittäiset uudet koronatartunnat Suomessa</strong></p>
+  <img src="ohsiha_app/chart">
 
   <p><a href="{% url 'logout' %}">logout</a></p>
 {% else %}

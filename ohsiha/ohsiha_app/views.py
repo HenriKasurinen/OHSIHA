@@ -2,13 +2,15 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
-from .models import Question, Choice 
+from .models import Question, Choice, Input, MyBarChartDrawing
 from django.views  import generic
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import TemplateView
 import requests
+import json
+
 
 
 
@@ -37,17 +39,6 @@ class ResultsView(AdminStaffRequiredMixin, generic.DetailView):
     template_name = 'ohsiha_app/results.html'
     permission_denied_message = "You are not allowed here."
 
-def LoginView(request):
-    username = request.POST['username']
-    password = request.POST['password']
-    user = authenticate(request, username=username, password=password)
-    if user is not None:
-        login(request, user)
-        # Redirect to a success page.
-        ...
-    else:
-        # Return an 'invalid login' error message.
-        ...
 
 @login_required
 def vote(request, question_id):
@@ -63,15 +54,32 @@ def vote(request, question_id):
     else:
         selected_choice.votes += 1
         selected_choice.save()
+        response = Input()
+        response.respondent_name = request.user
+        response.qestion = question
+        response.choise = selected_choice
+        response.save()
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse('ohsiha_app:results', args=(question.id,)))
 
 def home(request):
-    response = requests.get('https://visittampere.fi:443/api/v1/article?lang=fi&limit=10')
+    response = requests.get('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/finnishCoronaData/v2')
     textdata = response.json()
+    conf_amount = len(textdata['confirmed'])
+    reco_amount = len(textdata['recovered'])
+    
     return render(request, 'ohsiha_app/home.html', {
-        'contentti': textdata[0]['content']
-
+        'confirmed':  conf_amount,
+        'recovered':  reco_amount
     })
+
+@login_required
+def barchart(request):
+
+    #instantiate a drawing object
+    d = MyBarChartDrawing()
+    binaryStuff = d.asString('jpeg')
+    return HttpResponse(binaryStuff, 'image/jpeg')
+    
