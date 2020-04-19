@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
-from .models import Question, Choice, Input, MyBarChartDrawing
+from .models import Question, Choice, MyBarChartDrawing, Ans
 from django.views  import generic
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
@@ -10,9 +10,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import TemplateView
 import requests
 import json
-
-
-
 
 #Class for checking if user is admin
 class AdminStaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -35,10 +32,21 @@ class DetailView(LoginRequiredMixin, generic.DetailView):
 
 
 class ResultsView(AdminStaffRequiredMixin, generic.DetailView):
-    model = Question
+    model = Ans
     template_name = 'ohsiha_app/results.html'
     permission_denied_message = "You are not allowed here."
+    def all_inputs(self):
+        return Ans.objects.all()
 
+
+def show_all_answers(request):
+    if request.user.is_superuser or request.user.is_staff:
+        all_answers= Ans.objects.all()
+        context= {'all_answers': all_answers}
+        return render(request, 'ohsiha_app/results.html', context)
+    else:
+        return render(request, 'ohsiha_app/denied.html', {
+                'message': "Tämä alue on vain valmentajille.",})
 
 @login_required
 def vote(request, question_id):
@@ -54,15 +62,15 @@ def vote(request, question_id):
     else:
         selected_choice.votes += 1
         selected_choice.save()
-        response = Input()
+        response = Ans()
         response.respondent_name = request.user
-        response.qestion = question
+        response.question = question
         response.choise = selected_choice
         response.save()
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
-        return HttpResponseRedirect(reverse('ohsiha_app:results', args=(question.id,)))
+        return HttpResponseRedirect(reverse('ohsiha_app:detail', args=(question.id,)))
 
 def home(request):
     response = requests.get('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/finnishCoronaData/v2')
@@ -83,3 +91,16 @@ def barchart(request):
     binaryStuff = d.asString('jpeg')
     return HttpResponse(binaryStuff, 'image/jpeg')
     
+def testing(request):
+    response = requests.get('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/processedThlData')
+    textdata = response.json()
+    cases = []
+    barlabels = []
+    i = 0
+    for x in textdata['confirmed']['Kaikki sairaanhoitopiirit']:
+        i = i + 1
+        cases.append(x['value'])
+        
+    return render(request, 'ohsiha_app/test.html', {
+        'cases': cases})
+

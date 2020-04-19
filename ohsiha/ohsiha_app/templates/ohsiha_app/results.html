@@ -1,14 +1,38 @@
-<h1>{{ question.question_text }}</h1>
+{% extends 'ohsiha_app/base.html' %}
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+  integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-<ul>
-{% for choice in question.choice_set.all %}
-    <li>{{ choice.choice_text }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
-{% endfor %}
-</ul>
+{% block title %}Kysymykset{% endblock %}
 
-<a href="{% url 'ohsiha_app:detail' question.next_question %}">Next question</a>
+{% block content %}
 
-{% if user.is_authenticated %}
-  Hi {{ user.username }}!
-  <p><a href="{% url 'logout' %}">logout</a></p>
-{% endif %}
+<head>
+  <style>
+    table,
+    th,
+    td {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+
+<body>
+  <p id="asia">Bordered Table</p>
+
+  <table>
+    <tr>
+      <th>Nimi</th>
+      <th>Kysymys</th>
+      <th>Vastaus</th>
+    </tr>
+    {% for ans in all_answers %}
+    <tr>
+      <td>{{ ans.respondent_name }}</td>
+      <td>{{ ans.question }}</td>
+      <td>{{ ans.choise }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+</body>
+{% endblock %}

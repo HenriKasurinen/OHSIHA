@@ -1,27 +1,23 @@
 {% extends 'ohsiha_app/base.html' %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+  integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+  integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
+<body>
 
-{% block title %}Home{% endblock %}
+  {% block title %}Home{% endblock %}
 
-{% block content %}
-{% if user.is_authenticated %}
-  Hi {{ user.username }}!
+  {% block content %}
+
   <h2>KORONATILASTOJA</h2>
-  <p> <strong>Jokaisen valmentajan on hyvä tietää onko turvallista treenata. 
-    Tarkista tilanne kuvaajasta! </strong> </p>
+  <p> <strong>Jokaisen valmentajan on hyvä tietää onko turvallista treenata.
+      Tarkista tilanne kuvaajasta! </strong> </p>
   <p>Varmennetut tapaukset: <strong>{{ confirmed }}</strong></p>
   <p>Parantuneet potilaat: <strong>{{ recovered }}</strong></p>
 
   <p><strong>Päivittäiset uudet koronatartunnat Suomessa</strong></p>
   <img src="ohsiha_app/chart">
-
-  <p><a href="{% url 'logout' %}">logout</a></p>
-{% else %}
-  <p>You are not logged in</p>
-  <a href="{% url 'login' %}">login</a>
-  <br>
-  <br>
-  <a href="{% url 'signup'%}">Create account</a>
-{% endif %}
-
-{% endblock %}
+ 
+  {%endblock%}
+</body>

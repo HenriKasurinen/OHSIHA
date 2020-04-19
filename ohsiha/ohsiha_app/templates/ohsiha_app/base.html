@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <title>{% block title %}Django Auth Tutorial{% endblock %}</title>
 </head>
+
 <body>
+  {% include "ohsiha_app/navigation.html" %}
   <main>
+    {% if user.is_authenticated %}
+    Moi {{ user.username }}!
     {% block content %}
     {% endblock %}
+    {%else%}
+    <a href="{%url 'login' %}">Et ole kirjautunut sisää</a>
+    {%endif%}
   </main>
 </body>
+
 </html>

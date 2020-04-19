@@ -1,5 +1,11 @@
+{% extends 'ohsiha_app/base.html' %}
+
+{% block title %}Vastaa{% endblock %}
+
+{% block content %}
 
 <h1>{{ question.question_text }}</h1>
+<body>
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
@@ -9,12 +15,8 @@
     <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
     <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
 {% endfor %}
-<input type="submit" value="Vote">
+<input type="submit" value="Vote" >
 </form>
 
-<a href="{% url 'ohsiha_app:detail' question.id %}">Next Question</a>
-  
-{% if user.is_authenticated %}
-  Hi {{ user.username }}!
-  <p><a href="{% url 'logout' %}">logout</a></p>
-{% endif %}
+<a href="{% url 'ohsiha_app:detail' question.next_question %}">Next Question</a>
+{% endblock %}

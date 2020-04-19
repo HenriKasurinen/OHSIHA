@@ -29,12 +29,17 @@ class Choice(models.Model):
     def __str__(self):
         return self.choice_text
 
-class Input(models.Model):
-    respondent_name = models.CharField(max_length=200)
-    qestion = models.ForeignKey(Question, on_delete=models.CASCADE)
-    choise = models.ForeignKey(Choice, on_delete=models.CASCADE)
-# Create your models here.
 
+class Ans(models.Model):
+    respondent_name = models.CharField(max_length=200)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    choise = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    def get_name (self):
+        return self.respondent_name
+    def get_question(self):
+        return self.question.__str__
+    def get_choise(self):
+        return self.choise.__str__
 
 class MyBarChartDrawing(models.Model, Drawing):
     def __init__(self, width=600, height=350, *args, **kw):
@@ -43,14 +48,18 @@ class MyBarChartDrawing(models.Model, Drawing):
         cases = []
         barlabels = []
         i = 0
+        a = 0
         for x in textdata['confirmed']['Kaikki sairaanhoitopiirit']:
-            i = i + 1
-            cases.append(x['value'])
-            if i == 10:
-                barlabels.append(x['date'][8:10] + "." + x['date'][5:7])
-                i = 0
-            else:
-                barlabels.append(" ")    
+            a = a + 1
+            if(a>55):
+                i = i + 1
+                cases.append(x['value'])
+                if i == 10:
+                    barlabels.append(x['date'][8:10] + "." + x['date'][5:7])
+                    i = 0
+                else:
+                    barlabels.append(" ")    
+            
 
         Drawing.__init__(self,width,height,*args,**kw)
         self.add(VerticalBarChart(), name='chart')
