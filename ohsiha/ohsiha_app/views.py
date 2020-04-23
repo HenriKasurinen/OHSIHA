@@ -1,15 +1,19 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
-from .models import Question, Choice, MyBarChartDrawing, Ans
+from .models import Question, Choice, MyBarChartDrawing, Ans, ExternalKoronaData
+from .visualization import make_barchart, make_linegraph
 from django.views  import generic
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import TemplateView
+from django.utils import timezone
 import requests
+import datetime
 import json
+
 
 #Class for checking if user is admin
 class AdminStaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -73,22 +77,57 @@ def vote(request, question_id):
         return HttpResponseRedirect(reverse('ohsiha_app:detail', args=(question.id,)))
 
 def home(request):
-    response = requests.get('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/finnishCoronaData/v2')
-    textdata = response.json()
-    conf_amount = len(textdata['confirmed'])
-    reco_amount = len(textdata['recovered'])
-    
+    script = []
+    div = []
+
+    if not ExternalKoronaData.objects.filter(pull_date = timezone.now()).exists():
+        e = ExternalKoronaData.objects.create()
+        e.pull_data_from_api()
+        e.save()
+
+    else:
+        e = ExternalKoronaData.objects.get(pull_date = timezone.now())
+  
+
+    conf_amount = e.conf_amount
+    reco_amount = e.reco_amount
+
+    script, div = make_barchart(e)
+
+    script2, div2 = make_linegraph(e)
+
     return render(request, 'ohsiha_app/home.html', {
         'confirmed':  conf_amount,
-        'recovered':  reco_amount
+        'recovered':  reco_amount,
+        'script': script,
+        'div' : div,
+        'script2' : script2,
+        'div2' : div2
     })
 
 @login_required
 def barchart(request):
 
-    #instantiate a drawing object
-    d = MyBarChartDrawing()
+    if not ExternalKoronaData.objects.filter(pull_date = timezone.now()).exists():
+        e = ExternalKoronaData.objects.create()
+        e.pull_data_from_api()
+        e.save()
+
+    else:
+        e = ExternalKoronaData.objects.get(pull_date = timezone.now())
+
+    
+    data_str = e.data.split(",")
+    data = []
+    for elem in data_str:
+        data.append(int(elem))
+    
+    labels = e.bar_labels.split(',')
+    print("labels splitted")
+    d = MyBarChartDrawing(600, 350, (data, labels))
+    print("Barchart called")
     binaryStuff = d.asString('jpeg')
+    print("binarystuff done")
     return HttpResponse(binaryStuff, 'image/jpeg')
     
 def testing(request):

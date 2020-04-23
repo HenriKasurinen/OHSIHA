@@ -41,28 +41,53 @@ class Ans(models.Model):
     def get_choise(self):
         return self.choise.__str__
 
-class MyBarChartDrawing(models.Model, Drawing):
-    def __init__(self, width=600, height=350, *args, **kw):
+class ExternalKoronaData(models.Model):
+    pull_date = models.DateField(default = timezone.now )   
+    data = models.TextField()
+    bar_labels = models.TextField() 
+    conf_amount = models.IntegerField(default=0)
+    reco_amount = models.IntegerField(default=0)
+
+    def was_pulled_recently(self):  
+        return self.last_pull_date >= timezone.now() - datetime.timedelta(days=1) 
+
+    def pull_data_from_api(self):
         response = requests.get('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/processedThlData')
         textdata = response.json()
-        cases = []
-        barlabels = []
+        cases = ""
+        barlabels = ""
         i = 0
         a = 0
         for x in textdata['confirmed']['Kaikki sairaanhoitopiirit']:
             a = a + 1
             if(a>55):
                 i = i + 1
-                cases.append(x['value'])
-                if i == 10:
-                    barlabels.append(x['date'][8:10] + "." + x['date'][5:7])
-                    i = 0
-                else:
-                    barlabels.append(" ")    
-            
+                cases = cases + str(x['value']) + ','
+                barlabels = barlabels + x['date'] + ","
 
+        self.data = cases[:-1]
+        self.bar_labels = barlabels[:-1] 
+        self.last_pull_date = timezone.now()      
+
+        response2 = requests.get('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/finnishCoronaData/v2')
+        textdata2 = response2.json()
+        self.conf_amount = len(textdata2['confirmed'])
+        self.reco_amount = len(textdata2['recovered'])
+
+    def give_data(self):
+        return [self.data, self.bar_labels]
+
+
+class MyBarChartDrawing(models.Model, Drawing):
+    def __init__(self, width=600, height=350, *args, **kw):
         Drawing.__init__(self,width,height,*args,**kw)
+        print(args)
+        cases = args[0]
+        print("barchart:"+cases)
+        barlabels = args[1]
         self.add(VerticalBarChart(), name='chart')
+        self.dataSource = ExternalKoronaData
+        self.dataSource.sql = 'SELECT chartId,dotx,doty FROM generic_dotbox'
 
         #set any shapes, fonts, colors you want here.  We'll just
         #set a title font and place the chart within the drawing
@@ -88,5 +113,4 @@ class MyBarChartDrawing(models.Model, Drawing):
         self.chart.categoryAxis.labels.dy = -7
         self.chart.categoryAxis.labels.angle = 0
         self.chart.categoryAxis.categoryNames = barlabels
-
     
