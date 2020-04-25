@@ -4,20 +4,27 @@
 <head>
   <meta charset="utf-8">
   <title>{% block title %}Django Auth Tutorial{% endblock %}</title>
-
 </head>
 
-<body>
+
+
+<body style="background-color:rgb(219, 148, 148)" ;>
+
   {% include "ohsiha_app/navigation.html" %}
-  <main>
-    {% if user.is_authenticated %}
-    Moi {{ user.username }}!
-    {% block content %}
-    {% endblock %}
-    {%else%}
-    <a href="{%url 'login' %}">Et ole kirjautunut sisää</a>
-    {%endif%}
-  </main>
+  <div class="container-fluid">
+    <main>
+      {% if user.is_authenticated %}
+      <div>
+        Moi {{ user.username }}!
+      </div>
+      {% block content %}
+      {% endblock %}
+      {%else%}
+      <a href="{%url 'login' %}">Et ole kirjautunut sisää</a>
+      {%endif%}
+    </main>
+  </div>
 </body>
+
 
 </html>

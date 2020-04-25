@@ -33,7 +33,9 @@ class Choice(models.Model):
 class Ans(models.Model):
     respondent_name = models.CharField(max_length=200)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    user_id = models.IntegerField(default = 0)
     choise = models.ForeignKey(Choice, on_delete=models.CASCADE)
+    date = models.DateField(default = timezone.now)
     def get_name (self):
         return self.respondent_name
     def get_question(self):
@@ -47,9 +49,6 @@ class ExternalKoronaData(models.Model):
     bar_labels = models.TextField() 
     conf_amount = models.IntegerField(default=0)
     reco_amount = models.IntegerField(default=0)
-
-    def was_pulled_recently(self):  
-        return self.last_pull_date >= timezone.now() - datetime.timedelta(days=1) 
 
     def pull_data_from_api(self):
         response = requests.get('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/processedThlData')
@@ -77,40 +76,3 @@ class ExternalKoronaData(models.Model):
     def give_data(self):
         return [self.data, self.bar_labels]
 
-
-class MyBarChartDrawing(models.Model, Drawing):
-    def __init__(self, width=600, height=350, *args, **kw):
-        Drawing.__init__(self,width,height,*args,**kw)
-        print(args)
-        cases = args[0]
-        print("barchart:"+cases)
-        barlabels = args[1]
-        self.add(VerticalBarChart(), name='chart')
-        self.dataSource = ExternalKoronaData
-        self.dataSource.sql = 'SELECT chartId,dotx,doty FROM generic_dotbox'
-
-        #set any shapes, fonts, colors you want here.  We'll just
-        #set a title font and place the chart within the drawing
-        self.chart.x = 20
-        self.chart.y = 15
-        self.chart.width = self.width - 10
-        self.chart.height = self.height - 10
-
-        self.chart.data = [cases]
-
-        self.chart.valueAxis.valueMin = min(cases)
-        self.chart.valueAxis.valueMax = max(cases) + 2
-        self.chart.valueAxis.labels.fontName = 'Helvetica'
-        self.chart.valueAxis.labels.fontSize = 10
-        self.chart.valueAxis.labelTextFormat = '%0.0f'
-        self.chart.valueAxis.labels.dx = -5
-
-        self.chart.categoryAxis.labels.boxAnchor = 'c'
-        self.chart.categoryAxis.labels.fontName = 'Helvetica'
-        self.chart.categoryAxis.labels.fontSize = 12
-        self.chart.categoryAxis.tickDown = 0
-        self.chart.categoryAxis.labels.dx = 0
-        self.chart.categoryAxis.labels.dy = -7
-        self.chart.categoryAxis.labels.angle = 0
-        self.chart.categoryAxis.categoryNames = barlabels
-    

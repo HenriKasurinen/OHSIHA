@@ -31,7 +31,6 @@ def make_linegraph(e):
     i = 0
     for elem in data_str:
         i = i + int(elem)
-        print(i)
         data.append(i)
 
     labels = e.bar_labels.split(',')

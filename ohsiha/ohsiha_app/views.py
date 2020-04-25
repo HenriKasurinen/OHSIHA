@@ -1,8 +1,8 @@
-from django.shortcuts import render, get_object_or_404, render_to_response
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
-from .models import Question, Choice, MyBarChartDrawing, Ans, ExternalKoronaData
+from .models import Question, Choice, Ans, ExternalKoronaData
 from .visualization import make_barchart, make_linegraph
 from django.views  import generic
 from django.contrib.auth import authenticate, login
@@ -42,11 +42,25 @@ class ResultsView(AdminStaffRequiredMixin, generic.DetailView):
     def all_inputs(self):
         return Ans.objects.all()
 
+def result_helper(request, user_id):
+    if request.user.is_superuser or request.user.is_staff:
+        users = Ans.objects.values('respondent_name').distinct()
+        try:
+            filtered_data = Ans.objects.filter(user_id = user_id)
+        except(...):
+            return render(request, 'ohsiha_app/results.html')
+
+        context= {'all_answers': filtered_data, 'users' : users}
+        return render(request, 'ohsiha_app/results.html', context)
+    else:
+        return render(request, 'ohsiha_app/denied.html', {
+                'message': "Tämä alue on vain valmentajille.",})    
 
 def show_all_answers(request):
     if request.user.is_superuser or request.user.is_staff:
         all_answers= Ans.objects.all()
-        context= {'all_answers': all_answers}
+        users = Ans.objects.values('respondent_name').distinct()
+        context= {'all_answers': all_answers, 'users' : users}
         return render(request, 'ohsiha_app/results.html', context)
     else:
         return render(request, 'ohsiha_app/denied.html', {
@@ -66,10 +80,13 @@ def vote(request, question_id):
     else:
         selected_choice.votes += 1
         selected_choice.save()
+        current_user = request.user
         response = Ans()
-        response.respondent_name = request.user
+        response.respondent_name = current_user
         response.question = question
         response.choise = selected_choice
+        response.date = timezone.now()
+        response.user_id = current_user.id
         response.save()
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
@@ -87,13 +104,11 @@ def home(request):
 
     else:
         e = ExternalKoronaData.objects.get(pull_date = timezone.now())
-  
 
     conf_amount = e.conf_amount
     reco_amount = e.reco_amount
 
     script, div = make_barchart(e)
-
     script2, div2 = make_linegraph(e)
 
     return render(request, 'ohsiha_app/home.html', {

@@ -12,27 +12,42 @@
     th,
     td {
       border: 1px solid black;
+      background-color: white;
     }
   </style>
 </head>
 
+{% include "ohsiha_app/dropdown.html" %}
+
 <body>
-  <p id="asia">Bordered Table</p>
+  <div class="dropdown">
+    <button class="dropbtn">Valitse käyttäjä</button>
+    <div class="dropdown-content">
+      <a href="{% url 'ohsiha_app:results' %}">Kaikki käyttäjät</a>
+      {% for name in users %}
+      <a href="{% url 'ohsiha_app:result_helper' forloop.counter %}">{{name.respondent_name}}</a>
+      {% endfor %}
 
-  <table>
-    <tr>
-      <th>Nimi</th>
-      <th>Kysymys</th>
-      <th>Vastaus</th>
-    </tr>
-    {% for ans in all_answers %}
-    <tr>
-      <td>{{ ans.respondent_name }}</td>
-      <td>{{ ans.question }}</td>
-      <td>{{ ans.choise }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+    </div>
+  </div>
 
+  <div class="container-fluid">
+    <table>
+      <tr>
+        <th>Nimi</th>
+        <th>Kysymys</th>
+        <th>Vastaus</th>
+      </tr>
+      {% for ans in all_answers %}
+      <tr>
+        <td>{{ ans.respondent_name }}</td>
+        <td>{{ ans.question }}</td>
+        <td>{{ ans.choise }}</td>
+        <td>{{ ans.date }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
 </body>
+
 {% endblock %}

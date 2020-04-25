@@ -3,20 +3,28 @@
 {% block title %}Vastaa{% endblock %}
 
 {% block content %}
+<style>
 
-<h1>{{ question.question_text }}</h1>
-<body>
+<link rel="stylesheet" href="index.css"></link>
 
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+</style>
+<div class="centering-container">
+    <h1>{{ question.question_text }}</h1>
 
-<form action="{% url 'ohsiha_app:vote' question.id %}" method="post">
-{% csrf_token %}
-{% for choice in question.choice_set.all %}
-    <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-    <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
-{% endfor %}
-<input type="submit" value="Vote" >
-</form>
+    <body>
 
-<a href="{% url 'ohsiha_app:detail' question.next_question %}">Next Question</a>
-{% endblock %}
+        {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+        <form action="{% url 'ohsiha_app:vote' question.id %}" method="post">
+            {% csrf_token %}
+            {% for choice in question.choice_set.all %}
+            <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+            <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+            {% endfor %}
+            <input type="submit" value="Vote">
+        </form>
+
+        <a href="{% url 'ohsiha_app:detail' question.next_question %}">Next Question</a>
+        {% endblock %}
+    </body>
+</div>
