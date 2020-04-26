@@ -1,12 +1,16 @@
 {% include "ohsiha_app/navigation.html" %}
 
 {% block content %}
-<h2>Login</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Login</button>
-</form>
 
-<a href="{% url 'signup'%}">Ei tiliä? Luo se klikkaamalla tästä</a>
-{% endblock %}
+<body style="background-color: #F2DFD7" ;>
+  <h2>Login</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+  </form>
+
+  <a href="{% url 'signup'%}">Ei tiliä? Luo se klikkaamalla tästä</a>
+  {% endblock %}
+
+</body>

@@ -3,11 +3,7 @@
 {% block title %}Vastaa{% endblock %}
 
 {% block content %}
-<style>
 
-<link rel="stylesheet" href="index.css"></link>
-
-</style>
 <div class="centering-container">
     <h1>{{ question.question_text }}</h1>
 
@@ -21,7 +17,7 @@
             <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
             <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
             {% endfor %}
-            <input type="submit" value="Vote">
+            <input type="submit" value="Lähetä vastaus">
         </form>
 
         <a href="{% url 'ohsiha_app:detail' question.next_question %}">Next Question</a>

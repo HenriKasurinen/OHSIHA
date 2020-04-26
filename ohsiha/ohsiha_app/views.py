@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
 from .models import Question, Choice, Ans, ExternalKoronaData
-from .visualization import make_barchart, make_linegraph
+from .visualization import make_barchart, make_linegraph, make_user_data_linegraph
 from django.views  import generic
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
@@ -13,6 +13,7 @@ from django.utils import timezone
 import requests
 import datetime
 import json
+from django.contrib.auth.models import User
 
 
 #Class for checking if user is admin
@@ -26,14 +27,11 @@ class IndexView(LoginRequiredMixin, generic.ListView):
     context_object_name = 'latest_question_list'
 
     def get_queryset(self):
-        """Return the last five published questions."""
-        return Question.objects.order_by('-pub_date')[:5]
-
+        return Question.objects.order_by('-pub_date')
 
 class DetailView(LoginRequiredMixin, generic.DetailView):
     model = Question
     template_name = 'ohsiha_app/detail.html'
-
 
 class ResultsView(AdminStaffRequiredMixin, generic.DetailView):
     model = Ans
@@ -43,24 +41,44 @@ class ResultsView(AdminStaffRequiredMixin, generic.DetailView):
         return Ans.objects.all()
 
 def result_helper(request, user_id):
+    script = []
+    div = []
     if request.user.is_superuser or request.user.is_staff:
-        users = Ans.objects.values('respondent_name').distinct()
+        #users = Ans.objects.values('respondent_name').distinct()
+        users = User.objects.values('username').distinct()
         try:
             filtered_data = Ans.objects.filter(user_id = user_id)
+            script, div = make_user_data_linegraph(filtered_data)
         except(...):
             return render(request, 'ohsiha_app/results.html')
 
-        context= {'all_answers': filtered_data, 'users' : users}
+        context= {
+                'all_answers': filtered_data, 
+                'users' : users,
+                'script' : script,
+                'div' : div}
+
         return render(request, 'ohsiha_app/results.html', context)
     else:
         return render(request, 'ohsiha_app/denied.html', {
                 'message': "Tämä alue on vain valmentajille.",})    
 
 def show_all_answers(request):
+    script = []
+    div = []
     if request.user.is_superuser or request.user.is_staff:
-        all_answers= Ans.objects.all()
-        users = Ans.objects.values('respondent_name').distinct()
-        context= {'all_answers': all_answers, 'users' : users}
+        all_answers = Ans.objects.all()
+
+        script, div = make_user_data_linegraph(all_answers)
+
+        users = User.objects.values('username').distinct()
+
+        context= {
+        'all_answers': all_answers, 
+        'users' : users, 
+        'script': script,
+        'div' : div,}
+
         return render(request, 'ohsiha_app/results.html', context)
     else:
         return render(request, 'ohsiha_app/denied.html', {
@@ -91,7 +109,10 @@ def vote(request, question_id):
         # Always return an HttpResponseRedirect after successfully dealing
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
-        return HttpResponseRedirect(reverse('ohsiha_app:detail', args=(question.id,)))
+        if (Question.objects.filter(id = question.id + 1)).exists():
+            return HttpResponseRedirect(reverse('ohsiha_app:detail', args=(question.id + 1,)))
+        else:
+            return HttpResponseRedirect(reverse('ohsiha_app:index'))    
 
 def home(request):
     script = []
@@ -120,41 +141,65 @@ def home(request):
         'div2' : div2
     })
 
-@login_required
-def barchart(request):
-
-    if not ExternalKoronaData.objects.filter(pull_date = timezone.now()).exists():
-        e = ExternalKoronaData.objects.create()
-        e.pull_data_from_api()
-        e.save()
-
+def coach_home(request):
+    if request.user.is_superuser or request.user.is_staff:
+        return render(request, 'ohsiha_app/coach_home.html')
     else:
-        e = ExternalKoronaData.objects.get(pull_date = timezone.now())
+        return (request, 'ohsiha_app/denied.html', {
+                'message': "Tämä alue on vain valmentajille.",})
+      
+def add_question(request):
+    if request.user.is_superuser or request.user.is_staff:
+        kysymykset = Question.objects.all()
+        if request.method == 'POST':
+            q = Question(question_text=request.POST['qtext'], pub_date=timezone.now())
+            q.save()
+            if len(request.POST['atext']) >  0:
+                choises = request.POST['atext'].split(';')
+                i = 0
+                for choice in choises:
+                    q.choice_set.create(choice_text=choice, votes=0, category = i)
+                    i = i + 1
+                q.save()  
 
-    
-    data_str = e.data.split(",")
-    data = []
-    for elem in data_str:
-        data.append(int(elem))
-    
-    labels = e.bar_labels.split(',')
-    print("labels splitted")
-    d = MyBarChartDrawing(600, 350, (data, labels))
-    print("Barchart called")
-    binaryStuff = d.asString('jpeg')
-    print("binarystuff done")
-    return HttpResponse(binaryStuff, 'image/jpeg')
-    
-def testing(request):
-    response = requests.get('https://w3qa5ydb4l.execute-api.eu-west-1.amazonaws.com/prod/processedThlData')
-    textdata = response.json()
-    cases = []
-    barlabels = []
-    i = 0
-    for x in textdata['confirmed']['Kaikki sairaanhoitopiirit']:
-        i = i + 1
-        cases.append(x['value'])
-        
-    return render(request, 'ohsiha_app/test.html', {
-        'cases': cases})
+        return render(request, 'ohsiha_app/add_question.html',{'kysymykset' : kysymykset})
+    else:
+        return (request, 'ohsiha_app/denied.html', {
+                'message': "Tämä alue on vain valmentajille.",})    
+          
+def delete_question(request):
+    if request.user.is_superuser or request.user.is_staff:
+        kysymykset = Question.objects.all()
 
+        if request.method == 'POST':
+            q = Question.objects.get(pk=request.POST['question'])
+            q.delete()
+            kysymykset = Question.objects.all()
+        return render(request, 'ohsiha_app/delete.html',{'kysymykset' : kysymykset})
+    else:
+        return (request, 'ohsiha_app/denied.html', {
+                'message': "Tämä alue on vain valmentajille.",})   
+
+def modify_question(request):
+    if request.user.is_superuser or request.user.is_staff:
+        kysymykset = Question.objects.all()
+
+        if request.method == 'POST':
+            q = Question.objects.get(pk=request.POST['question'])
+            if len(request.POST['qtext']) >  0:
+                q.question_text = request.POST['qtext']
+                q.save()
+
+            if len(request.POST['atext']) >  0:
+                choises = request.POST['atext'].split(';')
+                i = q.choice_set.count() + 1
+                for choice in choises:
+                    q.choice_set.create(choice_text=choice, votes=0, category = i)
+                    i = i + 1
+                q.save()
+
+            kysymykset = Question.objects.all()
+        return render(request, 'ohsiha_app/modify_question.html',{'kysymykset' : kysymykset})
+    else:
+        return (request, 'ohsiha_app/denied.html', {
+                'message': "Tämä alue on vain valmentajille.",})       

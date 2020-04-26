@@ -1,8 +1,7 @@
-{% extends 'ohsiha_app/base.html' %}
+{% include "ohsiha_app/coach_nav.html" %}
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
   integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-{% block title %}Kysymykset{% endblock %}
 
 {% block content %}
 
@@ -12,31 +11,41 @@
     th,
     td {
       border: 1px solid black;
-      background-color: white;
+      background-color: #FF6978;
     }
   </style>
+
+<link href="http://cdn.pydata.org/bokeh/release/bokeh-2.0.2.min.css" rel=”stylesheet” type=”text/css”>
+<link href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-2.0.2.min.css" rel=”stylesheet” type=”text/css”>
+
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-2.0.2.min.js"></script>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-2.0.2.min.js"></script>
+{{ script | safe }}
+
 </head>
 
-{% include "ohsiha_app/dropdown.html" %}
-
-<body>
-  <div class="dropdown">
-    <button class="dropbtn">Valitse käyttäjä</button>
-    <div class="dropdown-content">
-      <a href="{% url 'ohsiha_app:results' %}">Kaikki käyttäjät</a>
-      {% for name in users %}
-      <a href="{% url 'ohsiha_app:result_helper' forloop.counter %}">{{name.respondent_name}}</a>
-      {% endfor %}
-
-    </div>
-  </div>
-
+<body style="background-color: #F2DFD7" ;>
   <div class="container-fluid">
+    {% include "ohsiha_app/dropdown.html" %}
+
+    <div class="dropdown">
+      <button class="dropbtn">Valitse käyttäjä</button>
+      <div class="dropdown-content">
+        <a href="{% url 'ohsiha_app:results' %}">Kaikki käyttäjät</a>
+        {% for name in users %}
+        <a href="{% url 'ohsiha_app:result_helper' forloop.counter %}">{{name.username}}</a>
+        {% endfor %}
+
+      </div>
+    </div>
+    <br><br>
+
     <table>
       <tr>
-        <th>Nimi</th>
-        <th>Kysymys</th>
-        <th>Vastaus</th>
+        <th style="color: white ; background-color: #96031A";>Nimi</th>
+        <th style="color: white ; background-color: #96031A";>Kysymys</th>
+        <th style="color: white ; background-color: #96031A";;>Vastaus</th>
+        <th style="color: white ; background-color: #96031A";>Päivämäärä</th>
       </tr>
       {% for ans in all_answers %}
       <tr>
@@ -48,6 +57,9 @@
       {% endfor %}
     </table>
   </div>
+
+  {{div | safe }}
+  
 </body>
 
 {% endblock %}

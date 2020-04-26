@@ -26,6 +26,7 @@ class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     choice_text = models.CharField(max_length=200)
     votes = models.IntegerField(default=0)
+    category = models.IntegerField(default = 0)
     def __str__(self):
         return self.choice_text
 
@@ -35,7 +36,7 @@ class Ans(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     user_id = models.IntegerField(default = 0)
     choise = models.ForeignKey(Choice, on_delete=models.CASCADE)
-    date = models.DateField(default = timezone.now)
+    date = models.DateField(default = timezone.now )
     def get_name (self):
         return self.respondent_name
     def get_question(self):

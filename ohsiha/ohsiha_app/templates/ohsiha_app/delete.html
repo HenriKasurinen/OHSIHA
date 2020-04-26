@@ -1,0 +1,18 @@
+{% include "ohsiha_app/coach_nav.html" %}
+
+<body style="background-color: #F2DFD7" ;>
+    <div class="container-fluid">
+        <h3>Valitse poistettava kysymys:</h3>
+
+        <form action="{% url 'ohsiha_app:delete_question'%}" method="post">
+            {% csrf_token %}
+            <ul>
+                {% for question in kysymykset %}
+                <input type="radio" name="question" id="question{{ forloop.counter }}" value="{{ question.id }}">
+                <label for="choice{{ forloop.counter }}">{{ question }}</label><br>
+                {% endfor %}
+            </ul>
+            <input type="submit" value="Poista kysymys">
+        </form>
+    </div>
+</body>

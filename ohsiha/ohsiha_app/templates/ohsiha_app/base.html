@@ -8,7 +8,7 @@
 
 
 
-<body style="background-color:rgb(219, 148, 148)" ;>
+<body style="background-color: #F2DFD7";>
 
   {% include "ohsiha_app/navigation.html" %}
   <div class="container-fluid">
@@ -20,7 +20,7 @@
       {% block content %}
       {% endblock %}
       {%else%}
-      <a href="{%url 'login' %}">Et ole kirjautunut sisää</a>
+      <a href="{%url 'login' %}">Et ole kirjautunut sisään</a>
       {%endif%}
     </main>
   </div>

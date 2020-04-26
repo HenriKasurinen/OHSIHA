@@ -1,0 +1,40 @@
+{% include "ohsiha_app/coach_nav.html" %}
+
+<body style="background-color: #F2DFD7" ;>
+    <div class="container-fluid">
+        <h3>Kaikki kysymykset:</h3>
+        <ol>
+            {% for kysymys in kysymykset%}
+
+            <li>{{kysymys}}</li>
+
+            {%endfor%}
+        </ol>
+
+        <h3>Täytä kysymyksen tiedot</h3>
+
+        <form action="{% url 'ohsiha_app:add_question' %}" method="post">
+            {% csrf_token %}
+            <p><strong>Kysymys:</strong></p>
+            <textarea id="qtext" name="qtext" rows="10" cols="30">Kirjoita kysymys tähän</textarea><br><br>
+            <p><strong>Vastaukset:</strong></p>
+            <textarea name="atext" id="atext" rows="10" cols="30">Kirjoita vastaukset tähän ja erottele ne puolipistein (;) Muista kategoriajärjestys huonoimmasta vaihtoehdosta parhaimpaan! Esim. Erittäin Huono ; Huono ; Kohtalainen ; Hyvä ; Erinomainen
+            </textarea><br><br>
+            <input type="submit" value="Submit">
+        </form>
+
+    </div>
+    <style>
+        #qtext {
+            height: 100px;
+            width: 500px;
+            text-align: initial;
+        }
+
+        #atext {
+            height: 200px;
+            width: 500px;
+            text-align: start;
+        }
+    </style>
+</body>
