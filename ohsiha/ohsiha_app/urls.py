@@ -13,6 +13,7 @@ urlpatterns = [
     path('coach_home', views.coach_home, name = 'coach_home'),
     path('add_question', views.add_question, name = 'add_question'),
     path('delete_question', views.delete_question, name = 'delete_question'),
-    path('modify_question', views.modify_question, name = 'modify_question')
+    path('modify_question', views.modify_question, name = 'modify_question'),
+    path('rest_api/', views.ListDataView.as_view(), name="data-all")
 ]
 

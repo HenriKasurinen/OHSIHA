@@ -14,7 +14,13 @@ import requests
 import datetime
 import json
 from django.contrib.auth.models import User
+from .serializers import DataSerializer
+from rest_framework import generics
 
+
+class ListDataView(generics.ListAPIView):
+    queryset = Ans.objects.all()
+    serializer_class = DataSerializer
 
 #Class for checking if user is admin
 class AdminStaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):

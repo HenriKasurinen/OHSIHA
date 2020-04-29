@@ -2,9 +2,6 @@ from django.db import models
 from django.utils import timezone
 import datetime
 
-from reportlab.graphics.shapes import Drawing, String
-from reportlab.graphics.charts.barcharts import VerticalBarChart
-
 import requests
 import json
 
