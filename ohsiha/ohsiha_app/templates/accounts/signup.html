@@ -1,10 +1,13 @@
 {% include "ohsiha_app/navigation.html" %}
 
 {% block content %}
+
+<body style="background-color: #F2DFD7" ;>
   <h2>Sign up</h2>
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Sign up</button>
   </form>
+</body>
 {% endblock %}

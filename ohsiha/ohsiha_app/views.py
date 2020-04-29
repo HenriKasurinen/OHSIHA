@@ -145,8 +145,9 @@ def coach_home(request):
     if request.user.is_superuser or request.user.is_staff:
         return render(request, 'ohsiha_app/coach_home.html')
     else:
+        message = "Tämä alue on vain valmentajille."
         return (request, 'ohsiha_app/denied.html', {
-                'message': "Tämä alue on vain valmentajille.",})
+                'message': message})
       
 def add_question(request):
     if request.user.is_superuser or request.user.is_staff:

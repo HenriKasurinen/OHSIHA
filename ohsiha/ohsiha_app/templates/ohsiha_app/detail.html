@@ -15,12 +15,12 @@
             {% csrf_token %}
             {% for choice in question.choice_set.all %}
             <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
-            <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
+            <label for="choice{{ forloop.counter }}" >{{ choice.choice_text }}</label><br>
             {% endfor %}
-            <input type="submit" value="Lähetä vastaus">
+            <input type="submit" value="Lähetä vastaus" style = "background-color: #FF6978; color: white ; border-color:#96031A;";>
         </form>
 
-        <a href="{% url 'ohsiha_app:detail' question.next_question %}">Next Question</a>
+        <a href="{% url 'ohsiha_app:detail' question.next_question %}" style = "color: #96031A;" >Siirry seuraavaan kysymykseen vastaamatta</a>
         {% endblock %}
     </body>
 </div>

@@ -74,6 +74,3 @@ class ExternalKoronaData(models.Model):
         self.conf_amount = len(textdata2['confirmed'])
         self.reco_amount = len(textdata2['recovered'])
 
-    def give_data(self):
-        return [self.data, self.bar_labels]
-
